@@ -2,7 +2,7 @@ import { userModel } from '../models/user.model';
 import { User, UserResponse, AuthTokens } from '../types/auth.types';
 import { ApiError } from '../middleware/error.middleware';
 import { JWT } from '../lib/jwt';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 export class AuthService {
   private userModel: any;
