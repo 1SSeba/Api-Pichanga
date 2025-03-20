@@ -1,4 +1,3 @@
- en src/interfaces/auth.interfaces.ts
 export interface LoginRequest {
     email: string;
     password: string;

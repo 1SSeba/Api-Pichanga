@@ -1,6 +1,7 @@
 import { Collection, ObjectId } from 'mongodb';
 import { db } from '../config/database';
 import { User } from '../types/auth.types';
+import { logger } from '../utils/logger';
 
 class UserModel {
   private static instance: UserModel;
@@ -19,16 +20,29 @@ class UserModel {
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    return this.collection.findOne({ email });
+    try {
+      const collection = db.getDb().collection('users');
+      const user = await collection.findOne({ email }) as User | null;
+      return user;
+    } catch (error) {
+      logger.error('Error al buscar usuario por email:', error);
+      throw error;
+    }
   }
-
+  
   async findById(_id: ObjectId): Promise<User | null> {
     return this.collection.findOne({ _id });
   }
 
-  async create(user: Omit<User, '_id'>): Promise<User> {
-    const result = await this.collection.insertOne(user as User);
-    return { ...user, _id: result.insertedId };
+  async create(userData: Omit<User, '_id'>): Promise<User> {
+    try {
+      const collection = db.getDb().collection('users');
+      const result = await collection.insertOne(userData);
+      return { _id: result.insertedId, ...userData };
+    } catch (error) {
+      logger.error('Error al crear usuario:', error);
+      throw error;
+    }
   }
 
   async updateById(_id: ObjectId, update: Partial<User>): Promise<boolean> {

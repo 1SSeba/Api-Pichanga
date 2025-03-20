@@ -8,11 +8,13 @@ import { authValidation } from '../validations/auth.validation';
 const router = Router();
 const authController = new AuthController();
 
-router.post('/register',
-  rateLimitMiddleware,
-  validate(authValidation.register),
-  authController.register
-);
+router.post('/register', async (req, res, next) => {
+  try {
+    await authController.register(req, res, next);
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.post('/login',
   rateLimitMiddleware,

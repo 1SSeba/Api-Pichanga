@@ -1,8 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import { constants } from '../config/constants';
 import { JWT } from '../lib/jwt';
+import { RutValidator } from '../utils/rutValidator';
 import { AuthRequest } from '../interfaces/request.interfaces';
 import { UserResponse } from '../types/auth.types';
+import { ApiError } from './error.middleware';
 
 export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
   const token = req.cookies && req.cookies[constants.COOKIE.AUTH];
@@ -28,4 +30,20 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
   } catch (error) {
     res.status(401).json({ success: false, error: 'Token inválido' });
   }
+};
+
+export const validateRut = (req: Request, res: Response, next: NextFunction) => {
+  const { rut } = req.body;
+  
+  if (!rut) {
+    return next(new ApiError(400, 'RUT es requerido'));
+  }
+  
+  if (!RutValidator.validate(rut)) {
+    return next(new ApiError(400, 'RUT inválido'));
+  }
+  
+  // Formatea el RUT antes de pasarlo al siguiente middleware
+  req.body.rut = RutValidator.format(rut);
+  next();
 };

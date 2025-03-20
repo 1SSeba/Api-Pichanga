@@ -2,10 +2,27 @@ import { ObjectId } from 'mongodb';
 import { userModel } from '../models/user.model';
 import { User, UserResponse } from '../types/auth.types';
 import { ApiError } from '../middleware/error.middleware';
+import { RutValidator } from '../utils/rutValidator';
 import { Cache } from '../lib/cache';
 
 export class UserService {
   private userCache = new Cache<UserResponse>('user', 30 * 60); // 30 minutes
+
+  async findUserByRut(rut: string) {
+    try {
+      // Normaliza el RUT para búsqueda consistente
+      const normalizedRut = RutValidator.normalize(rut);
+      if (!normalizedRut) {
+        throw new Error('RUT inválido');
+      }
+      
+      // Buscar usuario por RUT normalizado
+      const user = await userModel.findOne({ rut: normalizedRut });
+      return user;
+    } catch (error) {
+      throw error;
+    }
+  }
 
   async getUserById(id: string): Promise<UserResponse> {
     try {

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { userService } from '../services/user.service';
-import { AuthRequest } from '../interfaces/request.interface';
+import { AuthRequest } from '../interfaces/request.interfaces';
 
 export class UserController {
   async getProfile(req: AuthRequest, res: Response, next: NextFunction) {

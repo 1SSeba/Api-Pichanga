@@ -15,24 +15,49 @@ export class AuthService {
     this.userModel = await userModel;
   }
 
-  async register(userData: Omit<User, '_id' | 'createdAt' | 'updatedAt'>): Promise<UserResponse> {
+  async register(userData: { 
+    firstName: string;
+    lastName: string;
+    email: string;
+    rut: string;
+    phone: string;
+    password: string;
+  }): Promise<{ user: UserResponse; token: string; refreshToken: string }> {
+    if (!this.userModel) {
+      await this.initialize();
+    }
+    
+    // Verificar usuario existente
+    const existingUser = await this.userModel.findByEmail(userData.email);
+    if (existingUser) {
+      throw new ApiError(400, 'El email ya está registrado');
+    }
+    
+    // Hash de la contraseña
     const hashedPassword = await bcrypt.hash(userData.password, 10);
-    const user: User = {
+    
+    // Crear usuario
+    const user = await this.userModel.create({
       ...userData,
       password: hashedPassword,
       isEmailVerified: false,
       role: 'user',
       createdAt: new Date(),
       updatedAt: new Date()
+    });
+    
+    // Eliminar la contraseña del objeto a retornar
+    const { password: _, ...userResponse } = user;
+    
+    // Generar tokens
+    const token = JWT.signToken(userResponse);
+    const refreshToken = JWT.signToken(userResponse);
+    
+    return {
+      user: userResponse,
+      token,
+      refreshToken
     };
-
-    if (!this.userModel) {
-      await this.initialize();
-    }
-
-    const createdUser = await this.userModel.create(user);
-    const { password, ...userResponse } = createdUser;
-    return userResponse;
   }
 
   async login(email: string, password: string): Promise<{ user: UserResponse; token: string; refreshToken: string }> {

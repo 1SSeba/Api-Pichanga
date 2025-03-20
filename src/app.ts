@@ -34,10 +34,20 @@ async function startServer() {
     await db.connect();
     
     app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+      console.log(`🚀 Servidor iniciado en el puerto ${PORT}`);
+      console.log(`🌐 Entorno: ${process.env.NODE_ENV}`);
+      
+      if (process.env.DEBUG_MODE === 'true') {
+        console.log('🔧 Modo DEBUG activado:');
+        console.log('   - Redis: Simulado en memoria');
+        if (process.env.SKIP_CSRF === 'true') {
+          console.log('   - CSRF: Protección desactivada');
+        }
+        console.log('   - MongoDB: Conectado a', process.env.MONGODB_URI);
+      }
     });
   } catch (error) {
-    console.error('Error starting server:', error);
+    console.error('Error al iniciar el servidor:', error);
     process.exit(1);
   }
 }

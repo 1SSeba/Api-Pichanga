@@ -27,6 +27,15 @@ export interface User {
 
 export interface UserResponse extends Omit<User, 'password'> {}
 
+export interface UserData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  rut: string;
+  phone: string;
+  password: string;
+}
+
 export interface AuthTokens {
   token: string;
   refreshToken: string;
